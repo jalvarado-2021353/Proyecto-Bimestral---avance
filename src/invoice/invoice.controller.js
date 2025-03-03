@@ -85,24 +85,52 @@ export const getInvoiceById = async (req, res) => {
     }
 }
 
-export const updateInvoiceStatus = async (req, res) => {
+export const updateInvoice = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
-
-        if (!["Pending", "Completed", "Cancelled"].includes(status)) {
-            return res.status(400).send({ success: false, message: "Invalid status" });
+        const { products, status } = req.body;
+        const invoice = await Invoice.findById(id).populate("products.product");
+        if (!invoice) return res.status(404).send({ success: false, message: "Invoice not found" });
+        if (status) {
+            invoice.status = status;
         }
+        if (products && products.length > 0) {
+            let productUpdates = [];
+            for (let item of invoice.products) {
+                let product = await Product.findById(item.product._id);
+                if (product) {
+                    product.stock += item.quantity; 
+                    await product.save();
+                }
+            }
+            for (let item of products) {
+                let product = await Product.findById(item.product);
+                if (!product) return res.status(404).send({ success: false, message: `Product ${item.product} not found` });
+                if (product.stock < item.quantity) {
+                    return res.status(400).send({ success: false, message: `Not enough stock for ${product.name}` });
+                }
+                product.stock -= item.quantity; 
+                product.sold += item.quantity; 
+                await product.save();
 
-        const updatedInvoice = await Invoice.findByIdAndUpdate(id, { status }, { new: true });
-        if (!updatedInvoice) return res.status(404).send({ success: false, message: "Invoice not found" });
+                productUpdates.push({
+                    product: item.product,
+                    quantity: item.quantity,
+                    price: product.price
+                });
+            }
 
-        return res.send({ success: true, message: "Invoice status updated successfully", updatedInvoice });
+            invoice.products = productUpdates;
+        }
+        invoice.total = invoice.products.reduce((sum, item) => sum + item.quantity * item.price, 0);
+        await invoice.save();
+        return res.send({ success: true, message: "Invoice updated successfully", invoice });
     } catch (err) {
         console.error(err);
-        return res.status(500).send({ success: false, message: "Error updating invoice status", error: err.message });
+        return res.status(500).send({ success: false, message: "Error updating invoice", error: err.message });
     }
 };
+
 
 
 
