@@ -24,3 +24,21 @@ export const UpdateValidator = [
     body('username', 'Username cannot be empty').notEmpty().toLowerCase().custom(existUsername),
     validateErrors
 ]
+
+export const addProductValidator = [
+    body("name", "Product name cannot be empty").notEmpty().isLength({ max: 100 }).withMessage("Product name cannot exceed 100 characters"),
+    body("description", "Description is required").notEmpty(),
+    body("price", "Price is required and must be a positive number").notEmpty().isFloat({ min: 0 }).withMessage("Price cannot be negative"),
+    body("stock", "Stock is required and must be a positive number").notEmpty().isInt({ min: 0 }).withMessage("Stock cannot be negative"),
+    body("category", "Category is required").notEmpty().isMongoId().withMessage("Invalid category ID"),
+    validateErrors
+];
+
+export const updateProductValidator = [
+    body("name").optional().isLength({ max: 100 }).withMessage("Product name cannot exceed 100 characters"),
+    body("description").optional(),
+    body("price").optional().isFloat({ min: 0 }).withMessage("Price cannot be negative"),
+    body("stock").optional().isInt({ min: 0 }).withMessage("Stock cannot be negative"),
+    body("category").optional().isMongoId().withMessage("Invalid category ID"),
+    validateErrors
+];

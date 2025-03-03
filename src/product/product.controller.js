@@ -20,9 +20,7 @@ export const getAll = async (req, res) => {
             .populate("category", "name")
             .skip(Number(skip))
             .limit(Number(limit));
-
         if (products.length === 0) return res.status(404).send({ success: false, message: "Products not found" });
-
         return res.send({
             success: true,
             message: "Products found",
@@ -40,9 +38,7 @@ export const get = async (req, res) => {
     try {
         const { id } = req.params;
         const product = await Product.findById(id).populate("category", "name");
-
         if (!product) return res.status(404).send({ success: false, message: "Product not found" });
-
         return res.send({ success: true, message: "Product found", product });
     } catch (err) {
         console.error(err);
@@ -69,12 +65,38 @@ export const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const deletedProduct = await Product.findByIdAndDelete(id);
-
         if (!deletedProduct) return res.status(404).send({ success: false, message: "Product not found" });
-
         return res.send({ success: true, message: "Product deleted successfully" });
     } catch (err) {
         console.error(err);
         return res.status(500).send({ success: false, message: "General error", error: err.message });
     }
 };
+
+export const getOutOfStockProducts = async (req, res) => {
+    try {
+        const products = await Product.find({ stock: 0 }).populate("category", "name");
+        if (products.length === 0) return res.status(404).send({ success: false, message: "No out-of-stock products found" });
+        return res.send({ success: true, message: "Out-of-stock products retrieved successfully", products });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send({ success: false, message: "General error", error: err.message });
+    }
+};
+
+export const getTopSellingProducts = async (req, res) => {
+    try {
+        const { limit = 10 } = req.query;
+        const products = await Product.find()
+            .sort({ sold: -1 }) 
+            .limit(Number(limit))
+            .populate("category", "name");
+        if (products.length === 0) return res.status(404).send({ success: false, message: "No top-selling products found" })
+        return res.send({ success: true, message: "Top-selling products retrieved successfully", products })
+    } catch (err) {
+        console.error(err)
+        return res.status(500).send({ success: false, message: "General error", error: err.message })
+    }
+};
+
+
