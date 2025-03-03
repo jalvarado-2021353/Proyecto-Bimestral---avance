@@ -1,5 +1,5 @@
 //Validar campos en las rutas
-import { body } from "express-validator" //Capturar todo el body de la solicitud
+import { body, param } from "express-validator" //Capturar todo el body de la solicitud
 import { validateErrors,validateErrorWithoutImg } from "./validate.error.js"
 import { existUsername, objectIdValid } from "./db.validators.js"
 
@@ -32,7 +32,7 @@ export const addProductValidator = [
     body("stock", "Stock is required and must be a positive number").notEmpty().isInt({ min: 0 }).withMessage("Stock cannot be negative"),
     body("category", "Category is required").notEmpty().isMongoId().withMessage("Invalid category ID"),
     validateErrors
-];
+]
 
 export const updateProductValidator = [
     body("name").optional().isLength({ max: 100 }).withMessage("Product name cannot exceed 100 characters"),
@@ -41,4 +41,28 @@ export const updateProductValidator = [
     body("stock").optional().isInt({ min: 0 }).withMessage("Stock cannot be negative"),
     body("category").optional().isMongoId().withMessage("Invalid category ID"),
     validateErrors
-];
+]
+
+export const addInvoiceValidator = [
+    body("user", "User ID is required").notEmpty().isMongoId().withMessage("Invalid User ID"),
+    body("products", "Products must be an array").isArray({ min: 1 }).withMessage("Must include at least one product"),
+    body("products.*.product", "Product ID is required").notEmpty().isMongoId().withMessage("Invalid Product ID"),
+    body("products.*.quantity", "Quantity must be a positive number").isInt({ min: 1 }).withMessage("Quantity must be at least 1"),
+    validateErrors
+]
+
+export const updateInvoiceValidator = [
+    param("id", "Invoice ID must be a valid MongoID").isMongoId(),
+    body("status", "Status is required").notEmpty().isIn(["Pending", "Completed", "Cancelled"]).withMessage("Status must be 'Pending', 'Completed', or 'Cancelled'"),
+    validateErrors
+]
+
+export const getUserInvoicesValidator = [
+    param("userId", "User ID must be a valid MongoID").isMongoId(),
+    validateErrors
+]
+
+export const getInvoiceByIdValidator = [
+    param("id", "Invoice ID must be a valid MongoID").isMongoId(),
+    validateErrors
+]
