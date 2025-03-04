@@ -46,14 +46,22 @@ export const update = async(req,res)=>{
     }
 }
 
-export const deleteUser = async(req, res)=>{
+export const deleteUser = async (req, res) => {
     try {
-        const id = req.params.id
-        const deleteUser = await User.findByIdAndDelete(id)
-        if (!deleteUser)return res.status(404).send({Message: 'User not found'})
-            return res.send({message: 'User deleted succesfully'})
+        const { id } = req.params; 
+        const { password } = req.body;
+        const authenticatedUser = req.user;
+        let user = await User.findById(id);
+        if (!user) return res.status(404).send({ message: "User not found" });
+        if (authenticatedUser.role !== "ADMIN" && authenticatedUser.uid !== id) {
+            return res.status(403).send({ message: "You can only delete your own account" });
+        }
+        const passwordMatch = await checkPassword(user.password, password);
+        if (!passwordMatch) return res.status(400).send({ message: "Incorrect password" });
+        await User.findByIdAndDelete(id);
+        return res.send({ success: true, message: "User deleted successfully" });
     } catch (err) {
-        console.console.log(err);
-        return res.status(500).send({message: 'General Error',err})
-    }   
-}
+        console.error(err);
+        return res.status(500).send({ message: "Error deleting user", error: err.message });
+    }
+};

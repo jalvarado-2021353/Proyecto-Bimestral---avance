@@ -5,12 +5,12 @@ export const save = async (req, res) => {
         const data = req.body;
         const product = new Product(data);
         await product.save();
-        return res.send({ success: true, message: `${product.name} saved successfully`, product });
+        return res.send({ success: true, message: `${product.name} saved successfully`, product })
     } catch (err) {
         console.error(err);
-        return res.status(500).send({ success: false, message: "General error when adding product", error: err.message });
+        return res.status(500).send({ success: false, message: "General error when adding product", error: err.message })
     }
-};
+}
 
 // Obtener todos los productos con paginación
 export const getAll = async (req, res) => {
@@ -20,7 +20,7 @@ export const getAll = async (req, res) => {
             .populate("category", "name")
             .skip(Number(skip))
             .limit(Number(limit));
-        if (products.length === 0) return res.status(404).send({ success: false, message: "Products not found" });
+        if (products.length === 0) return res.status(404).send({ success: false, message: "Products not found" })
         return res.send({
             success: true,
             message: "Products found",
@@ -28,10 +28,10 @@ export const getAll = async (req, res) => {
             total: products.length
         });
     } catch (err) {
-        console.error(err);
-        return res.status(500).send({ success: false, message: "General error", error: err.message });
+        console.error(err)
+        return res.status(500).send({ success: false, message: "General error", error: err.message })
     }
-};
+}
 
 // Obtener un solo producto por ID
 export const get = async (req, res) => {
@@ -44,7 +44,7 @@ export const get = async (req, res) => {
         console.error(err);
         return res.status(500).send({ success: false, message: "General error", error: err.message });
     }
-};
+}
 
 // Actualizar un producto
 export const update = async (req, res) => {
@@ -58,7 +58,7 @@ export const update = async (req, res) => {
         console.error(err);
         return res.status(500).send({ success: false, message: "General error", error: err.message });
     }
-};
+}
 
 // Eliminar un producto
 export const deleteProduct = async (req, res) => {
@@ -71,7 +71,7 @@ export const deleteProduct = async (req, res) => {
         console.error(err);
         return res.status(500).send({ success: false, message: "General error", error: err.message });
     }
-};
+}
 
 export const getOutOfStockProducts = async (req, res) => {
     try {
@@ -82,7 +82,7 @@ export const getOutOfStockProducts = async (req, res) => {
         console.error(err);
         return res.status(500).send({ success: false, message: "General error", error: err.message });
     }
-};
+}
 
 export const getTopSellingProducts = async (req, res) => {
     try {
@@ -97,6 +97,6 @@ export const getTopSellingProducts = async (req, res) => {
         console.error(err)
         return res.status(500).send({ success: false, message: "General error", error: err.message })
     }
-};
+}
 
 

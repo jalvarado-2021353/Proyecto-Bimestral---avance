@@ -22,6 +22,12 @@ export const UpdateValidator = [
     body('name', 'Name cannot be empty').notEmpty(),
     body('surname', 'Surname cannot be empty').notEmpty(),
     body('username', 'Username cannot be empty').notEmpty().toLowerCase().custom(existUsername),
+    body('password', 'Password cannot be empty').notEmpty().isStrongPassword().withMessage('The password must be strong').isLength({min: 8}),
+    validateErrors
+]
+
+export const deleteAccountValidator = [
+    body("password", "Password is required").notEmpty(),
     validateErrors
 ]
 
